@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 function main() {
     const canvas = document.querySelector('#c');
@@ -22,7 +23,7 @@ function main() {
     const near = 5;
     const far = 50;
     const camera = new THREE.OrthographicCamera(left, right, top, bottom, near, far);
-    camera.zoom = 0.2;
+    camera.zoom = 0.1;
 
     camera.position.set(0, 10, 20);
 
@@ -40,6 +41,7 @@ function main() {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color('black');
     scene.add(cameraHelper);
+
 
     {
         const planeSize = 40;
@@ -69,6 +71,7 @@ function main() {
         mesh.position.set(cubeSize + 1, cubeSize / 2, 0);
         scene.add(mesh);
     }
+
     {
         const sphereRadius = 3;
         const sphereWidthDivisions = 32;
@@ -81,7 +84,17 @@ function main() {
         camera.lookAt(mesh.position.x, mesh.position.y, mesh.position.z);
         scene.add(mesh);
     }
+    {
+        const loader = new GLTFLoader();
+        loader.load('Flower.glb', function (gltf) {
+            scene.add(gltf.scene);
+        }, function (xhr) {
+            console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+        }, function (error) {
+            console.error(error);
+        });
 
+    }
     {
         const color = 0xFFFFFF;
         const intensity = 1;
@@ -99,6 +112,7 @@ function main() {
         const needResize = canvas.width !== width || canvas.height !== height;
         if (needResize) {
             renderer.setSize(width, height, false);
+            document.body.appendChild(renderer.domElement);
         }
         return needResize;
     }
