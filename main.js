@@ -6,6 +6,7 @@ function main() {
     const view1Elem = document.querySelector('#view1');
     const view2Elem = document.querySelector('#view2');
     const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
+    renderer.shadowMap.enabled = true;
 
     /*
     const fov = 45;
@@ -60,6 +61,7 @@ function main() {
             side: THREE.DoubleSide,
         });
         const mesh = new THREE.Mesh(planeGeo, planeMat);
+        mesh.receiveShadow = true;
         mesh.rotation.x = Math.PI * -.5;
         scene.add(mesh);
     }
@@ -68,6 +70,8 @@ function main() {
         const cubeGeo = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
         const cubeMat = new THREE.MeshPhongMaterial({ color: '#8AC' });
         const mesh = new THREE.Mesh(cubeGeo, cubeMat);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
         mesh.position.set(cubeSize + 1, cubeSize / 2, 0);
         scene.add(mesh);
     }
@@ -79,6 +83,8 @@ function main() {
         const sphereGeo = new THREE.SphereGeometry(sphereRadius, sphereWidthDivisions, sphereHeightDivisions);
         const sphereMat = new THREE.MeshPhongMaterial({ color: '#CA8' });
         const mesh = new THREE.Mesh(sphereGeo, sphereMat);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
         mesh.position.set(-sphereRadius - 1, sphereRadius + 2, 0);
 
         camera.lookAt(mesh.position.x, mesh.position.y, mesh.position.z);
@@ -95,14 +101,24 @@ function main() {
         });
 
     }
+    const luzes = new THREE.Object3D();
     {
         const color = 0xFFFFFF;
         const intensity = 1;
-        const light = new THREE.DirectionalLight(color, intensity);
-        light.position.set(0, 10, 0);
-        light.target.position.set(-5, 0, 0);
+        //const light = new THREE.DirectionalLight(color, intensity);
+        const light = new THREE.SpotLight(color, intensity);
+        light.angle = Math.PI / 25;
+        //const light = new THREE.PointLight(color, intensity);
+        light.castShadow = true;
+        light.position.set(0, 20, 0);
+        light.target.position.set(0, 0, 0);
         scene.add(light);
         scene.add(light.target);
+        //const cameraHelper = new THREE.CameraHelper(light.shadow.camera);
+        //const cameraHelper = new THREE.DirectionalLightHelper(light);
+        const cameraHelper = new THREE.SpotLightHelper(light);
+        //const cameraHelper = new THREE.PointLightHelper(light);
+        scene.add(cameraHelper);
     }
 
     function resizeRendererToDisplaySize(renderer) {
@@ -137,8 +153,13 @@ function main() {
     }
 
     function render() {
+        if (resizeRendererToDisplaySize(renderer)) {
+            const canvas = renderer.domElement;
+            camera.aspect = canvas.clientWidth / canvas.clientHeight;
+            camera.updateProjectionMatrix();
+        }
 
-        resizeRendererToDisplaySize(renderer);
+        renderer.render(scene, camera);
 
         renderer.setScissorTest(true);
 
