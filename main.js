@@ -102,23 +102,42 @@ function main() {
 
     }
     const luzes = new THREE.Object3D();
+    scene.add(luzes);
+    luzes.position.set(0, 0, 0);
     {
+        for (let z = -2; z < 2; z++) {
+            for (let x = -2; x < 2; x++) {
+                let color = 0xFFFFFF;
+                let intensity = 0.5;
+                let light = new THREE.SpotLight(color, intensity);
+                light.angle = Math.PI / 50;
+                light.castShadow = false;
+                light.position.set(0, 20, 0);
+                light.target.position.set(x * 5, 0, z * 5);
+                luzes.add(light);
+                luzes.add(light.target);
+                //const cameraHelper = new THREE.SpotLightHelper(light);
+                //scene.add(cameraHelper);
+            }
+        }
+        /*
         const color = 0xFFFFFF;
         const intensity = 1;
         //const light = new THREE.DirectionalLight(color, intensity);
         const light = new THREE.SpotLight(color, intensity);
-        light.angle = Math.PI / 25;
+        light.angle = Math.PI / 50;
         //const light = new THREE.PointLight(color, intensity);
         light.castShadow = true;
         light.position.set(0, 20, 0);
         light.target.position.set(0, 0, 0);
-        scene.add(light);
-        scene.add(light.target);
+        luzes.add(light);
+        luzes.add(light.target);
         //const cameraHelper = new THREE.CameraHelper(light.shadow.camera);
         //const cameraHelper = new THREE.DirectionalLightHelper(light);
         const cameraHelper = new THREE.SpotLightHelper(light);
         //const cameraHelper = new THREE.PointLightHelper(light);
         scene.add(cameraHelper);
+        */
     }
 
     function resizeRendererToDisplaySize(renderer) {
@@ -162,7 +181,9 @@ function main() {
         renderer.render(scene, camera);
 
         renderer.setScissorTest(true);
-
+        {
+            luzes.rotation.y += Math.PI / 100;
+        }
         {
             const aspect = setScissorForElement(view1Elem);
 
@@ -193,7 +214,6 @@ function main() {
 
             renderer.render(scene, camera2);
         }
-
         requestAnimationFrame(render);
     }
 
