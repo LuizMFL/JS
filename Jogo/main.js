@@ -8,10 +8,6 @@ function main() {
     const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
     renderer.shadowMap.enabled = true;
 
-    var upKey;
-    var rightKey;
-    var downKey;
-    var leftKey;
 
     const left = -1;
     const right = 1;
@@ -121,32 +117,7 @@ function main() {
             }
         );
     }
-    function setupInputs() {
-        document.addEventListener("keydown", function (event) {
-            if (event.key === "w" || event.key === "ArrowUp") {
-                camera.position.y += 0.001;
-            } else if (event.key == "a") {
-                camera.position.x -= 0.001;
-            } else if (event.key == "s") {
-                camera.position.y -= 0.001;
-            } else if (event.key == "d") {
-                camera.position.x += 0.001;
-            }
-        });
 
-        document.addEventListener("keyup", function (event) {
-            if (event.key === "w" || event.key === "ArrowUp") {
-                upKey = false;
-            } else if (event.key == "a") {
-                leftKey = false;
-            } else if (event.key == "s") {
-                downKey = false;
-            } else if (event.key == "d") {
-                rightKey = false;
-            }
-        });
-
-    }
 
     function resizeRendererToDisplaySize(renderer) {
         const canvas = renderer.domElement;
