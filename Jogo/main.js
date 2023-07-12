@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 function main() {
     const canvas = document.querySelector('#c');
@@ -6,6 +7,11 @@ function main() {
     const view2Elem = document.querySelector('#map');
     const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
     renderer.shadowMap.enabled = true;
+
+    var upKey;
+    var rightKey;
+    var downKey;
+    var leftKey;
 
     const left = -1;
     const right = 1;
@@ -92,6 +98,55 @@ function main() {
         const cameraHelper = new THREE.DirectionalLightHelper(light);
         scene.add(cameraHelper);
     }
+    {
+        var loaderGLTF = new GLTFLoader();
+        loaderGLTF.load(
+            "Jogo/Models/garota/scene.gltf",
+            function (gltf) {
+                model = gltf.scene;
+                let fileAnimations = gltf.animations;
+                model.traverse(o => {
+                    if (o.isMesh) {
+                        o.castShadow = true;
+                        o.receiveShadow = true;
+                    }
+                });
+                scene.add(model);
+                model.position.x = -5;
+                model.scale.set(1, 1, 1);
+            },
+            undefined, // We don't need this function
+            function (error) {
+                console.error(error);
+            }
+        );
+    }
+    function setupInputs() {
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "w" || event.key === "ArrowUp") {
+                camera.position.y += 0.001;
+            } else if (event.key == "a") {
+                camera.position.x -= 0.001;
+            } else if (event.key == "s") {
+                camera.position.y -= 0.001;
+            } else if (event.key == "d") {
+                camera.position.x += 0.001;
+            }
+        });
+
+        document.addEventListener("keyup", function (event) {
+            if (event.key === "w" || event.key === "ArrowUp") {
+                upKey = false;
+            } else if (event.key == "a") {
+                leftKey = false;
+            } else if (event.key == "s") {
+                downKey = false;
+            } else if (event.key == "d") {
+                rightKey = false;
+            }
+        });
+
+    }
 
     function resizeRendererToDisplaySize(renderer) {
         const canvas = renderer.domElement;
@@ -125,6 +180,7 @@ function main() {
     }
 
     function render() {
+        setupInputs();
         if (resizeRendererToDisplaySize(renderer)) {
             const canvas = renderer.domElement;
             camera.aspect = canvas.clientWidth / canvas.clientHeight;
