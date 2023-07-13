@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+//import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
 
 function main() {
     const canvas = document.querySelector('#c');
@@ -14,10 +15,10 @@ function main() {
     const top = 1;
     const bottom = -1;
     const near = 5;
-    const far = 50;
+    const far = 200;
     const camera = new THREE.OrthographicCamera(left, right, top, bottom, near, far);
     camera.zoom = 0.1;
-
+    camera.position.set(0, 10, 50);
 
     const cameraHelper = new THREE.CameraHelper(camera);
 
@@ -63,9 +64,9 @@ function main() {
         mesh.receiveShadow = true;
         mesh.position.set(-sphereRadius - 1, sphereRadius + 2, 0);
 
-        camera.position.set(mesh.position.x, mesh.position.y + 2, 40);
+
         camera.lookAt(mesh.position.x, mesh.position.y, mesh.position.z);
-        //scene.add(mesh);
+        scene.add(mesh);
     }
 
     const luzes = new THREE.Object3D();
@@ -76,14 +77,14 @@ function main() {
         const intensity = 1;
         const light = new THREE.DirectionalLight(color, intensity);
         light.castShadow = true;
-        light.position.set(0, 20, 0);
+        light.position.set(0, 20, 50);
         light.target.position.set(0, 0, 0);
         luzes.add(light);
         luzes.add(light.target);
         const cameraHelper = new THREE.DirectionalLightHelper(light);
         scene.add(cameraHelper);
     }
-
+    /*
     {
         var loaderGLTF = new GLTFLoader();
         loaderGLTF.load(
@@ -100,6 +101,7 @@ function main() {
             }
         );
     }
+    */
 
 
     function resizeRendererToDisplaySize(renderer) {
@@ -172,7 +174,7 @@ function main() {
 
         requestAnimationFrame(render);
     }
-    requestAnimationFrame(render);
+    render();
 }
 
 main();
