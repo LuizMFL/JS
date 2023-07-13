@@ -51,17 +51,6 @@ function main() {
         mesh.rotation.x = Math.PI * -.5;
         scene.add(mesh);
     }
-    {
-        const cubeSize = 4;
-        const cubeGeo = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
-        const cubeMat = new THREE.MeshPhongMaterial({ color: '#8AC' });
-        const mesh = new THREE.Mesh(cubeGeo, cubeMat);
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        mesh.position.set(cubeSize + 1, cubeSize / 2, 0);
-
-        scene.add(mesh);
-    }
 
     {
         const sphereRadius = 3;
@@ -76,7 +65,7 @@ function main() {
 
         camera.position.set(mesh.position.x, mesh.position.y + 2, 40);
         camera.lookAt(mesh.position.x, mesh.position.y, mesh.position.z);
-        scene.add(mesh);
+        //scene.add(mesh);
     }
 
     const luzes = new THREE.Object3D();
@@ -94,22 +83,16 @@ function main() {
         const cameraHelper = new THREE.DirectionalLightHelper(light);
         scene.add(cameraHelper);
     }
+
     {
         var loaderGLTF = new GLTFLoader();
         loaderGLTF.load(
-            "Jogo/Models/garota/scene.gltf",
+            "Models/miranha/scene.gltf",
             function (gltf) {
-                model = gltf.scene;
-                let fileAnimations = gltf.animations;
-                model.traverse(o => {
-                    if (o.isMesh) {
-                        o.castShadow = true;
-                        o.receiveShadow = true;
-                    }
+                gltf.scene.traverse(c => {
+                    c.castShadow = true;
                 });
-                scene.add(model);
-                model.position.x = -5;
-                model.scale.set(1, 1, 1);
+                scene.add(gltf.scene);
             },
             undefined, // We don't need this function
             function (error) {
@@ -151,7 +134,6 @@ function main() {
     }
 
     function render() {
-        setupInputs();
         if (resizeRendererToDisplaySize(renderer)) {
             const canvas = renderer.domElement;
             camera.aspect = canvas.clientWidth / canvas.clientHeight;
@@ -161,8 +143,6 @@ function main() {
         renderer.setScissorTest(true);
         {
             const aspect = setScissorForElement(view1Elem);
-
-            //camera.aspect = aspect;
 
             camera.left = -aspect;
             camera.right = aspect;
@@ -188,6 +168,8 @@ function main() {
 
             renderer.render(scene, camera2);
         }
+
+
         requestAnimationFrame(render);
     }
     requestAnimationFrame(render);
