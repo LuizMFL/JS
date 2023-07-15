@@ -17,12 +17,12 @@ function main() {
     
     */
 
-    const left = -1;
-    const right = 1;
-    const top = 1;
-    const bottom = -1;
-    const near = 5;
-    const far = 50;
+    var left = -1;
+    var right = 1;
+    var top = 1;
+    var bottom = -1;
+    var near = 5;
+    var far = 50;
     const camera = new THREE.OrthographicCamera(left, right, top, bottom, near, far);
     camera.zoom = 0.1;
 

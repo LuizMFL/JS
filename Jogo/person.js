@@ -1,4 +1,5 @@
-class person {
+
+export class person {
     constructor(mesh) {
         this.mesh = mesh;
         this.speed = 0;
@@ -7,6 +8,9 @@ class person {
         this.move = [false, false, false, false];
     }
 
+    modobjeto(mesh) {
+        this.mesh = mesh;
+    }
     vida(x) {
         this.life += x;
     }

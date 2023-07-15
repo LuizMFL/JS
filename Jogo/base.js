@@ -1,36 +1,39 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as Person from './person.js';
-import { CharacterControls } from './CharacterControls.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls';
 function main() {
     const canvas = document.querySelector('#c');
     const view1Elem = document.querySelector('#game');
     const view2Elem = document.querySelector('#map');
     const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
     renderer.shadowMap.enabled = true;
-
-    // SCENE
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color('black');
-
-    // CAMERA
+    /*
+    const left = -1;
+    const right = 1;
+    const top = 1;
+    const bottom = -1;
+    const near = 5;
+    const far = 50;
+    const camera = new THREE.OrthographicCamera(left, right, top, bottom, near, far);
+    camera.zoom = 0.1;
+    */
     const fov = 45;
     const aspect = 2;
     const near = 5;
     const far = 100;
     const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    camera.lookAt(0, 0, 0);
-    camera.position.set(0, 5, 10);
-    const cameraHelper = new THREE.CameraHelper(camera);
-    scene.add(cameraHelper);
 
-    // MAP
+    //const cameraHelper = new THREE.CameraHelper(camera);
+
     const camera2 = new THREE.PerspectiveCamera(60, 2, 0.1, 500,);
     camera2.position.set(40, 10, 30);
     camera2.lookAt(0, 5, 0);
 
-    // PLANO
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color('black');
+    scene.add(camera);
+
+
     {
         const planeSize = 40;
 
@@ -53,45 +56,42 @@ function main() {
         scene.add(mesh);
     }
 
-    // LUZES
     {
-        let color = 0xFFFFFF;
-        let intensity = 0.5;
-        let light = new THREE.DirectionalLight(color, intensity);
+        const sphereRadius = 3;
+        const sphereWidthDivisions = 32;
+        const sphereHeightDivisions = 16;
+        const sphereGeo = new THREE.SphereGeometry(sphereRadius, sphereWidthDivisions, sphereHeightDivisions);
+        const sphereMat = new THREE.MeshPhongMaterial({ color: '#CA8' });
+        const mesh = new THREE.Mesh(sphereGeo, sphereMat);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        mesh.position.set(-sphereRadius - 1, sphereRadius + 2, 0);
+
+        camera.position.set(mesh.position.x, mesh.position.y + 10, 40);
+        camera.lookAt(mesh.position.x, mesh.position.y, mesh.position.z);
+        scene.add(mesh);
+    }
+
+    {
+        const color = 0xFFFFFF;
+        const intensity = 1;
+        const light = new THREE.DirectionalLight(color, intensity);
         light.castShadow = true;
-        light.position.set(0, 10000, 0);
-        light.target.position.set(0, 0, 0);
-        scene.add(light);
-        scene.add(light.target);
-        light = new THREE.SpotLight(color, intensity);
-        light.angle = Math.PI / 2;
-        light.castShadow = false;
-        light.position.set(0, 10, 100);
+        light.position.set(0, 20, 0);
         light.target.position.set(0, 0, 0);
         scene.add(light);
         scene.add(light.target);
     }
-
-    // MODEL
-    var characterControls;
+    /*
     {
         var loaderGLTF = new GLTFLoader();
         loaderGLTF.load(
-            "Models/Soldier.glb",
+            "Models/spider/scene.gltf",
             function (gltf) {
-                gltf.scene.traverse(function (object) {
-                    if (object.isMesh) object.castShadow = true;
+                gltf.scene.traverse(c => {
+                    c.castShadow = true;
                 });
                 scene.add(gltf.scene);
-                var gltfAnimations = gltf.animations;
-                var mixer = new THREE.AnimationMixer(gltf.scene);
-                var animationsMap = new Map();
-                gltfAnimations.filter(a => a.name != 'TPose').forEach(a => {
-                    animationsMap.set(a.name, mixer.clipAction(a))
-                });
-                characterControls = new CharacterControls(gltf.scene, mixer, animationsMap, camera, 'Idle');
-                camera.lookAt(gltf.scene.position.x, gltf.scene.position.y, gltf.scene.position.z);
-
             },
             undefined, // We don't need this function
             function (error) {
@@ -99,20 +99,7 @@ function main() {
             }
         );
     }
-
-    var keyPressed = {};
-    document.addEventListener("keydown", function (event) {
-        if (event.shiftKey && characterControls) {
-            characterControls.switchRunToggle();
-        } else {
-            keyPressed[event.key.toLowerCase()] = true;
-        }
-
-    }, false);
-
-    document.addEventListener("keyup", function (event) {
-        keyPressed[event.key.toLowerCase()] = false;
-    }, false);
+    */
 
     function resizeRendererToDisplaySize(renderer) {
         const canvas = renderer.domElement;
@@ -145,12 +132,7 @@ function main() {
         return width / height;
     }
 
-    var clock = new THREE.Clock();
     function render() {
-        let mixerUpdateDelta = clock.getDelta();
-        if (characterControls) {
-            characterControls.update(mixerUpdateDelta, keyPressed);
-        }
         if (resizeRendererToDisplaySize(renderer)) {
             const canvas = renderer.domElement;
             camera.aspect = canvas.clientWidth / canvas.clientHeight;
@@ -165,9 +147,9 @@ function main() {
             camera.right = aspect;
 
             camera.updateProjectionMatrix();
-            cameraHelper.update();
+            //cameraHelper.update();
 
-            cameraHelper.visible = false;
+            //cameraHelper.visible = false;
 
             scene.background.set(0x000000);
 
@@ -179,7 +161,7 @@ function main() {
             camera2.aspect = aspect;
             camera2.updateProjectionMatrix();
 
-            cameraHelper.visible = true;
+            //cameraHelper.visible = true;
 
             scene.background.set(0x000040);
 
@@ -189,7 +171,7 @@ function main() {
 
         requestAnimationFrame(render);
     }
-    requestAnimationFrame(render);
+    render();
 }
 
 main();
