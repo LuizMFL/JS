@@ -3,6 +3,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as Person from './person.js';
 import { CharacterControls } from './CharacterControls.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls';
+
 function main() {
     const canvas = document.querySelector('#c');
     const view1Elem = document.querySelector('#game');
@@ -22,6 +23,7 @@ function main() {
     const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
     camera.lookAt(0, 0, 0);
     camera.position.set(0, 5, 10);
+
     const cameraHelper = new THREE.CameraHelper(camera);
     scene.add(cameraHelper);
 
@@ -60,6 +62,7 @@ function main() {
         let light = new THREE.DirectionalLight(color, intensity);
         light.castShadow = true;
         light.position.set(0, 10000, 0);
+
         light.target.position.set(0, 0, 0);
         scene.add(light);
         scene.add(light.target);
@@ -74,6 +77,7 @@ function main() {
 
     // MODEL
     var characterControls;
+
     {
         var loaderGLTF = new GLTFLoader();
         loaderGLTF.load(
@@ -99,6 +103,7 @@ function main() {
             }
         );
     }
+    * /
 
     var keyPressed = {};
     document.addEventListener("keydown", function (event) {
@@ -189,7 +194,7 @@ function main() {
 
         requestAnimationFrame(render);
     }
-    requestAnimationFrame(render);
+    render();
 }
 
 main();
