@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import * as Person from './person.js';
 import { CharacterControls } from './CharacterControls.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls';
 
@@ -21,8 +20,7 @@ function main() {
     const near = 5;
     const far = 100;
     const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    camera.lookAt(0, 0, 0);
-    camera.position.set(0, 5, 10);
+    camera.position.set(0, 5, 12);
 
     const cameraHelper = new THREE.CameraHelper(camera);
     scene.add(cameraHelper);
@@ -77,24 +75,24 @@ function main() {
 
     // MODEL
     var characterControls;
-
     {
         var loaderGLTF = new GLTFLoader();
         loaderGLTF.load(
             "Models/Soldier.glb",
             function (gltf) {
-                gltf.scene.traverse(function (object) {
+                let model = gltf.scene;
+                model.traverse(function (object) {
                     if (object.isMesh) object.castShadow = true;
                 });
-                scene.add(gltf.scene);
+                scene.add(model);
                 var gltfAnimations = gltf.animations;
-                var mixer = new THREE.AnimationMixer(gltf.scene);
+                var mixer = new THREE.AnimationMixer(model);
                 var animationsMap = new Map();
                 gltfAnimations.filter(a => a.name != 'TPose').forEach(a => {
-                    animationsMap.set(a.name, mixer.clipAction(a))
+                    animationsMap.set(a.name, mixer.clipAction(a));
                 });
-                characterControls = new CharacterControls(gltf.scene, mixer, animationsMap, camera, 'Idle');
-                camera.lookAt(gltf.scene.position.x, gltf.scene.position.y, gltf.scene.position.z);
+                characterControls = new CharacterControls(model, mixer, animationsMap, camera, 'Idle');
+                camera.lookAt(model.position.x, model.position.y + 2, model.position.z);
 
             },
             undefined, // We don't need this function
@@ -105,7 +103,7 @@ function main() {
     }
 
     var keyPressed = {};
-    document.addEventListener("keydown", function (event) {
+    document.addEventListener("keydown", (event) => {
         if (event.shiftKey && characterControls) {
             characterControls.switchRunToggle();
         } else {
@@ -114,7 +112,7 @@ function main() {
 
     }, false);
 
-    document.addEventListener("keyup", function (event) {
+    document.addEventListener("keyup", (event) => {
         keyPressed[event.key.toLowerCase()] = false;
     }, false);
 
@@ -149,7 +147,7 @@ function main() {
         return width / height;
     }
 
-    var clock = new THREE.Clock();
+    const clock = new THREE.Clock();
     function render() {
         let mixerUpdateDelta = clock.getDelta();
         if (characterControls) {
@@ -160,7 +158,6 @@ function main() {
             camera.aspect = canvas.clientWidth / canvas.clientHeight;
             camera.updateProjectionMatrix();
         }
-        renderer.render(scene, camera);
         renderer.setScissorTest(true);
         {
             const aspect = setScissorForElement(view1Elem);
@@ -193,7 +190,7 @@ function main() {
 
         requestAnimationFrame(render);
     }
-    render();
+    requestAnimationFrame(render);
 }
 
 main();
