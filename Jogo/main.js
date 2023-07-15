@@ -103,7 +103,6 @@ function main() {
             }
         );
     }
-    * /
 
     var keyPressed = {};
     document.addEventListener("keydown", function (event) {
