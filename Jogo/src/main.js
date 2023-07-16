@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { CharacterControls } from './CharacterControls.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls';
+import * as CANNON from 'cannon-es';
 
 function main() {
     const canvas = document.querySelector('#c');
@@ -78,7 +78,7 @@ function main() {
     {
         var loaderGLTF = new GLTFLoader();
         loaderGLTF.load(
-            "Models/Soldier.glb",
+            "../Models/Soldier.glb",
             function (gltf) {
                 let model = gltf.scene;
                 model.traverse(function (object) {
