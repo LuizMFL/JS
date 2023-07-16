@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { CharacterControls } from './CharacterControls.js';
-import * as CANNON from 'cannon-es';
+//import * as CANNON from '../cannon-es';
 
 function main() {
     const canvas = document.querySelector('#c');
