@@ -23,7 +23,9 @@ export class CharacterControls {
         this.walkVelocity = 2;
         this.toggleRun = true;
     }
-
+    bModel() {
+        return this.model;
+    }
     switchRunToggle() {
         this.toggleRun = !this.toggleRun;
     }

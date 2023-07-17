@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { CharacterControls } from './CharacterControls.js';
-//import * as CANNON from '../cannon-es';
+import * as CannonDebugger from 'cannon-es-debugger';
+import * as CANNON from 'cannon-es';
 
 function main() {
     const canvas = document.querySelector('#c');
@@ -74,13 +75,16 @@ function main() {
     }
 
     // MODEL
+    var model;
     var characterControls;
+    const box = new CANNON.Body({ mass: 5, shape: new CANNON.Box(new CANNON.Vec3(1, 1, 1)), });
+
     {
         var loaderGLTF = new GLTFLoader();
         loaderGLTF.load(
             "../Models/Soldier.glb",
             function (gltf) {
-                let model = gltf.scene;
+                model = gltf.scene;
                 model.traverse(function (object) {
                     if (object.isMesh) object.castShadow = true;
                 });
@@ -93,7 +97,7 @@ function main() {
                 });
                 characterControls = new CharacterControls(model, mixer, animationsMap, camera, 'Idle');
                 camera.lookAt(model.position.x, model.position.y + 2, model.position.z);
-
+                box.position.copy(model.mesh.position);
             },
             undefined, // We don't need this function
             function (error) {
@@ -101,7 +105,27 @@ function main() {
             }
         );
     }
+    // CANNON-ES
+    const physicsWorld = new CANNON.World({ gravity: new CANNON.Vec3(0, -9.82, 0), });
+    const groundBody = new CANNON.Body({ type: CANNON.Body.STATIC, shape: new CANNON.Plane(), });
+    groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
+    physicsWorld.addBody(groundBody);
 
+    const radius = 1;
+    const sphereBody = new CANNON.Body({ mass: 5, shape: new CANNON.Sphere(radius), });
+    sphereBody.position.set(0, 7, 0);
+    physicsWorld.addBody(sphereBody);
+
+    const geometry = new THREE.SphereGeometry(radius);
+    const material = new THREE.MeshNormalMaterial();
+    const sphereMesh = new THREE.Mesh(geometry, material);
+    scene.add(sphereMesh);
+
+    physicsWorld.addBody(box);
+
+    // CANNON DEBUGGER
+    //const cannonDebugger = new CannonDebugger(scene, physicsWorld, {});
+    // INPUT
     var keyPressed = {};
     document.addEventListener("keydown", (event) => {
         if (event.shiftKey && characterControls) {
@@ -149,6 +173,10 @@ function main() {
 
     const clock = new THREE.Clock();
     function render() {
+        physicsWorld.fixedStep();
+        sphereMesh.position.copy(sphereBody.position);
+        sphereMesh.quaternion.copy(sphereBody.quaternion);
+
         let mixerUpdateDelta = clock.getDelta();
         if (characterControls) {
             characterControls.update(mixerUpdateDelta, keyPressed);
