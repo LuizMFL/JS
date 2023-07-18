@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import * as CANNON from 'cannon-es';
 
 export class CharacterControls {
     model;
@@ -27,7 +28,9 @@ export class CharacterControls {
             }
         });
         this.camera = camera;
-
+        // Cannon
+        this.box = new CANNON.Body({ mass: 10, shape: new CANNON.Box(new CANNON.Vec3(1, 1, 1)), });
+        this.box.position.set(this.model.position.x, this.model.position.y, this.model.position.z);
     }
     bModel() {
         return this.model;
@@ -37,8 +40,7 @@ export class CharacterControls {
     }
 
     update(delta, keyPressed) {
-
-
+        this.model.position.set(this.box.position.x, this.box.position.y, this.box.position.z);
         var directionPressed = this.DIRECTIONS.some(key => keyPressed[key] == true);
         var play = '';
 
@@ -84,8 +86,9 @@ export class CharacterControls {
             const moveZ = this.walkDirection.z * velocity * delta;
             this.model.position.x += moveX;
             this.model.position.z += moveZ;
-            this.updateCameraTarget(moveX, moveZ);
         }
+        this.box.position.set(this.model.position.x, this.model.position.y, this.model.position.z);
+        this.updateCameraTarget();
     }
 
     directionOffset(keysPressed) {
@@ -114,10 +117,11 @@ export class CharacterControls {
         return directionOffset
     }
 
-    updateCameraTarget(moveX, moveZ) {
+    updateCameraTarget() {
         // move camera
-        this.camera.position.x += moveX;
-        this.camera.position.z += moveZ;
+        this.camera.position.x = this.model.position.x;
+        this.camera.position.y = this.model.position.y + 5;
+        this.camera.position.z = this.model.position.z + 12;
 
         // update camera target
         this.cameraTarget.x = this.model.position.x;

@@ -104,7 +104,6 @@ async function main() {
     }
 
     // MODEL
-    const box = new CANNON.Body({ mass: 5, shape: new CANNON.Box(new CANNON.Vec3(1, 1, 1)), });
     var characterControls = await loadGLTFModel("../Models/Soldier.glb", camera);
     scene.add(characterControls.model);
 
@@ -115,8 +114,8 @@ async function main() {
     physicsWorld.addBody(groundBody);
 
     const radius = 1;
-    const sphereBody = new CANNON.Body({ mass: 5, shape: new CANNON.Sphere(radius), });
-    sphereBody.position.set(0, 7, 0);
+    const sphereBody = new CANNON.Body({ mass: 1, shape: new CANNON.Sphere(radius), });
+    sphereBody.position.set(0, 10, 0);
     physicsWorld.addBody(sphereBody);
 
     const geometry = new THREE.SphereGeometry(radius);
@@ -124,9 +123,8 @@ async function main() {
     const sphereMesh = new THREE.Mesh(geometry, material);
     scene.add(sphereMesh);
 
-    physicsWorld.addBody(box);
+    physicsWorld.addBody(characterControls.box);
 
-    model = characterControls.bModel();
     // CANNON DEBUGGER
     //const cannonDebugger = new CannonDebugger(scene, physicsWorld, {});
     // INPUT
