@@ -1,11 +1,24 @@
 import * as THREE from 'three';
 
 export class CharacterControls {
+    model;
+    mixer;
+    animationsMap;
+    currentAction;
+    camera;
+    walkDirection = new THREE.Vector3();
+    rotateAngle = new THREE.Vector3(0, 1, 0);
+    rotateQuarternion = new THREE.Quaternion();
+    cameraTarget = new THREE.Vector3();
+    fadeDuration = 0.2;
+    runVelocity = 5;
+    walkVelocity = 2;
+    toggleRun = true;
+
     constructor(model, mixer, animationsMap, camera, currentAction) {
         this.DIRECTIONS = ['w', 'a', 's', 'd']
         this.model = model;
         this.mixer = mixer;
-        this.animationsMap = animationsMap;
         this.currentAction = currentAction;
         this.animationsMap = animationsMap;
         this.animationsMap.forEach((value, key) => {
@@ -14,14 +27,7 @@ export class CharacterControls {
             }
         });
         this.camera = camera;
-        this.walkDirection = new THREE.Vector3();
-        this.rotateAngle = new THREE.Vector3(0, 1, 0);
-        this.rotateQuarternion = new THREE.Quaternion();
-        this.cameraTarget = new THREE.Vector3();
-        this.fadeDuration = 0.2;
-        this.runVelocity = 5;
-        this.walkVelocity = 2;
-        this.toggleRun = true;
+
     }
     bModel() {
         return this.model;

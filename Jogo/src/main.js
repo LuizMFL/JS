@@ -4,7 +4,36 @@ import { CharacterControls } from './CharacterControls.js';
 import * as CannonDebugger from 'cannon-es-debugger';
 import * as CANNON from 'cannon-es';
 
-function main() {
+async function loadGLTFModel(url, camera) {
+    return new Promise((resolve, reject) => {
+        const loaderGLTF = new GLTFLoader();
+        loaderGLTF.load(
+            url,
+            (gltf) => {
+                var model = gltf.scene;
+                model.traverse(function (object) {
+                    if (object.isMesh) object.castShadow = true;
+                });
+                var gltfAnimations = gltf.animations;
+                var mixer = new THREE.AnimationMixer(model);
+                var animationsMap = new Map();
+                gltfAnimations.filter(a => a.name != 'TPose').forEach(a => {
+                    animationsMap.set(a.name, mixer.clipAction(a));
+                });
+                camera.lookAt(model.position);
+                var characterControls = new CharacterControls(model, mixer, animationsMap, camera, 'Idle');
+                resolve(characterControls);
+
+            },
+            undefined,
+            (error) => {
+                reject(error);
+            }
+        );
+    });
+}
+
+async function main() {
     const canvas = document.querySelector('#c');
     const view1Elem = document.querySelector('#game');
     const view2Elem = document.querySelector('#map');
@@ -75,36 +104,10 @@ function main() {
     }
 
     // MODEL
-    var model;
-    var characterControls;
     const box = new CANNON.Body({ mass: 5, shape: new CANNON.Box(new CANNON.Vec3(1, 1, 1)), });
+    var characterControls = await loadGLTFModel("../Models/Soldier.glb", camera);
+    scene.add(characterControls.model);
 
-    {
-        var loaderGLTF = new GLTFLoader();
-        loaderGLTF.load(
-            "../Models/Soldier.glb",
-            function (gltf) {
-                model = gltf.scene;
-                model.traverse(function (object) {
-                    if (object.isMesh) object.castShadow = true;
-                });
-                scene.add(model);
-                var gltfAnimations = gltf.animations;
-                var mixer = new THREE.AnimationMixer(model);
-                var animationsMap = new Map();
-                gltfAnimations.filter(a => a.name != 'TPose').forEach(a => {
-                    animationsMap.set(a.name, mixer.clipAction(a));
-                });
-                characterControls = new CharacterControls(model, mixer, animationsMap, camera, 'Idle');
-                camera.lookAt(model.position.x, model.position.y + 2, model.position.z);
-                box.position.copy(model.mesh.position);
-            },
-            undefined, // We don't need this function
-            function (error) {
-                console.error(error);
-            }
-        );
-    }
     // CANNON-ES
     const physicsWorld = new CANNON.World({ gravity: new CANNON.Vec3(0, -9.82, 0), });
     const groundBody = new CANNON.Body({ type: CANNON.Body.STATIC, shape: new CANNON.Plane(), });
@@ -123,6 +126,7 @@ function main() {
 
     physicsWorld.addBody(box);
 
+    model = characterControls.bModel();
     // CANNON DEBUGGER
     //const cannonDebugger = new CannonDebugger(scene, physicsWorld, {});
     // INPUT
