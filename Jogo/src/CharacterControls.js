@@ -15,9 +15,9 @@ export class CharacterControls {
     runVelocity = 5;
     walkVelocity = 2;
     toggleRun = true;
-
+    // Cannon
     constructor(model, mixer, animationsMap, camera, currentAction) {
-        this.DIRECTIONS = ['w', 'a', 's', 'd']
+        this.DIRECTIONS = ['w', 'a', 's', 'd', ' '];
         this.model = model;
         this.mixer = mixer;
         this.currentAction = currentAction;
@@ -28,13 +28,24 @@ export class CharacterControls {
             }
         });
         this.camera = camera;
-        // Cannon
         this.box = new CANNON.Body({ mass: 10, shape: new CANNON.Box(new CANNON.Vec3(1, 1, 1)), });
         this.box.position.set(this.model.position.x, this.model.position.y, this.model.position.z);
+        this.canJump = false;
+        this.box.addEventListener("collide", (e) => {
+            var contactNormal = new CANNON.Vec3();
+            var upAxis = new CANNON.Vec3(0, 1, 0);
+            var contact = e.contact;
+            if (contact.bi.id == this.box.id) {
+                contact.ni.negate(contactNormal);
+            } else {
+                contactNormal.copy(contact.ni);
+            }
+            if (contactNormal.dot(upAxis) > 0.5) {
+                this.canJump = true;
+            }
+        });
     }
-    bModel() {
-        return this.model;
-    }
+
     switchRunToggle() {
         this.toggleRun = !this.toggleRun;
     }
@@ -92,7 +103,12 @@ export class CharacterControls {
     }
 
     directionOffset(keysPressed) {
-        var directionOffset = 0 // w
+        if (keysPressed[' '] && this.canJump) {
+            this.box.velocity.y += 10;
+            this.canJump = false;
+        }
+
+        var directionOffset = 0; // w
 
         if (keysPressed['w']) {
             if (keysPressed['a']) {

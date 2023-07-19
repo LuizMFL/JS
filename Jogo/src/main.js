@@ -20,6 +20,7 @@ async function loadGLTFModel(url, camera) {
                 gltfAnimations.filter(a => a.name != 'TPose').forEach(a => {
                     animationsMap.set(a.name, mixer.clipAction(a));
                 });
+                model.position.y += 1;
                 camera.lookAt(model.position);
                 var characterControls = new CharacterControls(model, mixer, animationsMap, camera, 'Idle');
                 resolve(characterControls);
@@ -115,7 +116,7 @@ async function main() {
 
     const radius = 1;
     const sphereBody = new CANNON.Body({ mass: 1, shape: new CANNON.Sphere(radius), });
-    sphereBody.position.set(0, 10, 0);
+    sphereBody.position.set(5, 10, 0);
     physicsWorld.addBody(sphereBody);
 
     const geometry = new THREE.SphereGeometry(radius);
