@@ -28,8 +28,9 @@ export class CharacterControls {
             }
         });
         this.camera = camera;
-        this.box = new CANNON.Body({ mass: 10, shape: new CANNON.Box(new CANNON.Vec3(1, 1, 1)), });
+        this.box = new CANNON.Body({ mass: 100, shape: new CANNON.Box(new CANNON.Vec3(1, 1, 1)), linearDamping: 0.5, angularDamping: 1.0, });
         this.box.position.set(this.model.position.x, this.model.position.y, this.model.position.z);
+        this.box.damping
         this.canJump = false;
         this.box.addEventListener("collide", (e) => {
             var contactNormal = new CANNON.Vec3();
@@ -51,7 +52,8 @@ export class CharacterControls {
     }
 
     update(delta, keyPressed) {
-        this.model.position.set(this.box.position.x, this.box.position.y, this.box.position.z);
+        this.model.position.set(this.box.position.x, this.box.position.y - 1, this.box.position.z);
+        keyPressed = this.jumping(keyPressed);
         var directionPressed = this.DIRECTIONS.some(key => keyPressed[key] == true);
         var play = '';
 
@@ -77,6 +79,7 @@ export class CharacterControls {
                 (this.camera.position.x - this.model.position.x),
                 (this.camera.position.z - this.model.position.z)
             );
+
             var directionOffset = this.directionOffset(keyPressed);
 
             // rotate model
@@ -98,16 +101,19 @@ export class CharacterControls {
             this.model.position.x += moveX;
             this.model.position.z += moveZ;
         }
-        this.box.position.set(this.model.position.x, this.model.position.y, this.model.position.z);
+        this.box.position.set(this.model.position.x, this.model.position.y + 1, this.model.position.z);
         this.updateCameraTarget();
     }
 
-    directionOffset(keysPressed) {
-        if (keysPressed[' '] && this.canJump) {
+    jumping(keyPressed) {
+        if (keyPressed[' '] && this.canJump) {
             this.box.velocity.y += 10;
             this.canJump = false;
         }
-
+        keyPressed[' '] = false;
+        return keyPressed;
+    }
+    directionOffset(keysPressed) {
         var directionOffset = 0; // w
 
         if (keysPressed['w']) {
