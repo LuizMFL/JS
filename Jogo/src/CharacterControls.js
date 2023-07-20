@@ -12,13 +12,14 @@ export class CharacterControls {
     rotateQuarternion = new THREE.Quaternion();
     cameraTarget = new THREE.Vector3();
     fadeDuration = 0.2;
-    runVelocity = 5;
-    walkVelocity = 2;
+    runVelocity = 5 * 2;
+    walkVelocity = 2 * 2;
     toggleRun = true;
     // Cannon
     constructor(model, mixer, animationsMap, camera, currentAction) {
-        this.DIRECTIONS = ['w', 'a', 's', 'd', ' '];
+        this.MOVEMENTS = ['a', 'd', ' '];
         this.model = model;
+        this.model.scale.set(3, 3, 3);
         this.mixer = mixer;
         this.currentAction = currentAction;
         this.animationsMap = animationsMap;
@@ -28,9 +29,9 @@ export class CharacterControls {
             }
         });
         this.camera = camera;
-        this.box = new CANNON.Body({ mass: 100, shape: new CANNON.Box(new CANNON.Vec3(1, 1, 1)), linearDamping: 0.5, angularDamping: 1.0, });
-        this.box.position.set(this.model.position.x, this.model.position.y, this.model.position.z);
-        this.box.damping
+
+        this.box = new CANNON.Body({ mass: 100, shape: new CANNON.Box(new CANNON.Vec3(1, 2.5, 1)), linearDamping: 0.5, angularDamping: 1.0, });
+        this.box.position.set(this.model.position.x, this.model.position.y + 2.5, this.model.position.z);
         this.canJump = false;
         this.box.addEventListener("collide", (e) => {
             var contactNormal = new CANNON.Vec3();
@@ -45,6 +46,10 @@ export class CharacterControls {
                 this.canJump = true;
             }
         });
+        // Para verificar hitbox
+        //var cubeGeometry = new THREE.BoxGeometry(2, 5, 2);
+        //var cubeMaterial = new THREE.MeshNormalMaterial();
+        //this.cubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
     }
 
     switchRunToggle() {
@@ -52,9 +57,9 @@ export class CharacterControls {
     }
 
     update(delta, keyPressed) {
-        this.model.position.set(this.box.position.x, this.box.position.y - 1, this.box.position.z);
+        this.model.position.set(this.box.position.x, this.box.position.y - 2.5, this.box.position.z);
         keyPressed = this.jumping(keyPressed);
-        var directionPressed = this.DIRECTIONS.some(key => keyPressed[key] == true);
+        var directionPressed = this.MOVEMENTS.some(key => keyPressed[key] == true);
         var play = '';
 
         if (directionPressed && this.toggleRun) {
@@ -101,7 +106,8 @@ export class CharacterControls {
             this.model.position.x += moveX;
             this.model.position.z += moveZ;
         }
-        this.box.position.set(this.model.position.x, this.model.position.y + 1, this.model.position.z);
+        this.box.position.set(this.model.position.x, this.model.position.y + 2.5, this.model.position.z);
+        //this.cubeMesh.position.copy(this.box.position);
         this.updateCameraTarget();
     }
 
@@ -115,22 +121,7 @@ export class CharacterControls {
     }
     directionOffset(keysPressed) {
         var directionOffset = 0; // w
-
-        if (keysPressed['w']) {
-            if (keysPressed['a']) {
-                directionOffset = Math.PI / 4 // w+a
-            } else if (keysPressed['d']) {
-                directionOffset = - Math.PI / 4 // w+d
-            }
-        } else if (keysPressed['s']) {
-            if (keysPressed['a']) {
-                directionOffset = Math.PI / 4 + Math.PI / 2 // s+a
-            } else if (keysPressed['d']) {
-                directionOffset = -Math.PI / 4 - Math.PI / 2 // s+d
-            } else {
-                directionOffset = Math.PI // s
-            }
-        } else if (keysPressed['a']) {
+        if (keysPressed['a']) {
             directionOffset = Math.PI / 2 // a
         } else if (keysPressed['d']) {
             directionOffset = - Math.PI / 2 // d
@@ -142,8 +133,8 @@ export class CharacterControls {
     updateCameraTarget() {
         // move camera
         this.camera.position.x = this.model.position.x;
-        this.camera.position.y = this.model.position.y + 5;
-        this.camera.position.z = this.model.position.z + 12;
+        this.camera.position.y = this.model.position.y + 15;
+        this.camera.position.z = this.model.position.z + 36;
 
         // update camera target
         this.cameraTarget.x = this.model.position.x;

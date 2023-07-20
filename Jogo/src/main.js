@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
 import { CharacterControls } from './CharacterControls.js';
 import * as CannonDebugger from 'cannon-es-debugger';
 import * as CANNON from 'cannon-es';
@@ -20,9 +21,10 @@ async function loadGLTFModel(url, camera) {
                 gltfAnimations.filter(a => a.name != 'TPose').forEach(a => {
                     animationsMap.set(a.name, mixer.clipAction(a));
                 });
-                model.position.y += 1;
                 camera.lookAt(model.position);
                 var characterControls = new CharacterControls(model, mixer, animationsMap, camera, 'Idle');
+
+                console.log(model);
                 resolve(characterControls);
 
             },
@@ -51,7 +53,7 @@ async function main() {
     const near = 5;
     const far = 100;
     const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    camera.position.set(0, 5, 12);
+    camera.position.set(0, 15, 36);
 
     const cameraHelper = new THREE.CameraHelper(camera);
     scene.add(cameraHelper);
@@ -63,20 +65,20 @@ async function main() {
 
     // PLANO
     {
-        const planeSize = 40;
+        const planeSize = 200;
 
         const loader = new THREE.TextureLoader();
-        const texture = loader.load('https://threejs.org/manual/examples/resources/images/checker.png');
+        const texture = loader.load('../Texture/terra.png');
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;
         texture.magFilter = THREE.NearestFilter;
-        const repeats = planeSize / 2;
+        const repeats = 10;
         texture.repeat.set(repeats, repeats);
 
         const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
+
         const planeMat = new THREE.MeshPhongMaterial({
-            map: texture,
-            side: THREE.DoubleSide,
+            map: texture
         });
         const mesh = new THREE.Mesh(planeGeo, planeMat);
         mesh.receiveShadow = true;
@@ -106,8 +108,12 @@ async function main() {
 
     // MODEL
     var characterControls = await loadGLTFModel("../Models/Soldier.glb", camera);
+    var casa = await loadGLTFModel("../Models/house/scene.gltf", camera2);
+    casa.model.scale.set(10, 10, 10);
+    casa.model.position.set(10, 10, -20);
+    scene.add(casa.model);
     scene.add(characterControls.model);
-
+    //scene.add(characterControls.cubeMesh);
     // CANNON-ES
     const physicsWorld = new CANNON.World({ gravity: new CANNON.Vec3(0, -9.82, 0), });
     const groundBody = new CANNON.Body({ type: CANNON.Body.STATIC, shape: new CANNON.Plane(), });
@@ -117,7 +123,9 @@ async function main() {
     const radius = 1;
     const sphereBody = new CANNON.Body({ mass: 1, shape: new CANNON.Sphere(radius), });
     sphereBody.position.set(5, 10, 0);
+    sphereBody.material = new CANNON.Material();
     physicsWorld.addBody(sphereBody);
+
 
     const geometry = new THREE.SphereGeometry(radius);
     const material = new THREE.MeshNormalMaterial();
