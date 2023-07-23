@@ -47,6 +47,7 @@ async function main() {
     const view2Elem = document.querySelector('#map');
     const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
     renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     // SCENE
     const scene = new THREE.Scene();
@@ -87,6 +88,7 @@ async function main() {
         });
         const mesh = new THREE.Mesh(planeGeo, planeMat);
         mesh.receiveShadow = true;
+        mesh.castShadow = false;
         mesh.rotation.x = Math.PI * -.5;
         scene.add(mesh);
     }
@@ -94,21 +96,25 @@ async function main() {
     // LUZES
     {
         let color = 0xFFFFFF;
-        let intensity = 0.5;
+        let intensity = 0.8;
         let light = new THREE.DirectionalLight(color, intensity);
         light.castShadow = true;
-        light.position.set(0, 10000, 0);
+        light.position.set(0, 50, 100);
+        light.target.position.set(0, 0, 0);
+        scene.add(light);
+        scene.add(light.target);
+        var d = 500;
+        light.castShadow = true;
+        light.shadow.mapSize.width = 1024;
+        light.shadow.mapSize.height = 1024;
+        light.shadow.camera.left = - d;
+        light.shadow.camera.right = d;
+        light.shadow.camera.top = d;
+        light.shadow.camera.bottom = - d;
+        light.shadow.bias = -0.001;
+        light.shadow.camera.near = 1;
+        light.shadow.camera.far = 500;
 
-        light.target.position.set(0, 0, 0);
-        scene.add(light);
-        scene.add(light.target);
-        light = new THREE.SpotLight(color, intensity);
-        light.angle = Math.PI / 2;
-        light.castShadow = false;
-        light.position.set(0, 10, 100);
-        light.target.position.set(0, 0, 0);
-        scene.add(light);
-        scene.add(light.target);
     }
 
     // MODEL
@@ -118,6 +124,70 @@ async function main() {
 
     scene.add(characterControls.model);
     scene.add(arvore);
+    var object = scene.getObjectByName("tree002");
+    object.position.set(0, 0, -10);
+    object = scene.getObjectByName("tree003");
+    object.position.set(3, 0, -7);
+    object = scene.getObjectByName("tree004");
+    object.position.set(30, 0, -10);
+    object = scene.getObjectByName("tree005");
+    object.position.set(10, 0, 5);
+    object = scene.getObjectByName("tree006");
+    object.position.set(-4, 0, -5);
+    object = scene.getObjectByName("tree007");
+    object.position.set(-7, 0, -2);
+    object = scene.getObjectByName("tree008");
+    object.position.set(23, 0, 9);
+    object = scene.getObjectByName("tree009");
+    object.position.set(30, 0, -45);
+    object = scene.getObjectByName("tree010");
+    object.position.set(37, 0, -20);
+    object = scene.getObjectByName("tree011");
+    object.position.set(42, 0, 12);
+    object = scene.getObjectByName("tree012");
+    object.position.set(50, 0, 16);
+    object = scene.getObjectByName("tree013");
+    object.position.set(60, 0, -32);
+    object = scene.getObjectByName("tree014");
+    object.position.set(62, 0, -35);
+    object = scene.getObjectByName("tree015");
+    object.position.set(64, 0, 25);
+    object = scene.getObjectByName("tree016");
+    object.position.set(70, 0, 10);
+    object = scene.getObjectByName("tree017");
+    object.position.set(76, 0, -8);
+
+    // Arbustos
+    object = scene.getObjectByName("bush001");
+    object.position.set(75, 0, -7);
+    object = scene.getObjectByName("bush002");
+    object.position.set(5, 0, 10);
+    object = scene.getObjectByName("bush003");
+    object.position.set(27, 0, -30);
+    object = scene.getObjectByName("bush004");
+    object.position.set(40, 0, 10);
+    object = scene.getObjectByName("bush005");
+    object.position.set(42, 0, 5);
+    object = scene.getObjectByName("bush007");
+    object.position.set(60, 0, -34);
+    object = scene.getObjectByName("bush008");
+    object.position.set(69, 0, -10);
+
+    // Arvores secas e podres:
+    object = scene.getObjectByName("tree001");
+    object.position.set(100, 0, -63);
+    object = scene.getObjectByName("tree018");
+    object.position.set(107, 0, -58);
+    object = scene.getObjectByName("tree022");
+    object.position.set(115, 0, -47);
+    object = scene.getObjectByName("tree023");
+    object.position.set(130, 0, -55);
+    // Arvores Fora de scena
+    object = scene.getObjectByName("tree019");
+    scene.remove(object);
+    object = scene.getObjectByName("tree020");
+    scene.remove(object);
+    console.log(object);
     //scene.add(characterControls.cubeMesh);
     // CANNON-ES
     const physicsWorld = new CANNON.World({ gravity: new CANNON.Vec3(0, -9.82, 0), });
