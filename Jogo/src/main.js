@@ -2,10 +2,9 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 import { CharacterControls } from './CharacterControls.js';
-import * as CannonDebugger from 'cannon-es-debugger';
 import * as CANNON from 'cannon-es';
 
-async function loadGLTFModel(url, camera) {
+async function loadGLTFModel(url, camera, char) {
     return new Promise((resolve, reject) => {
         const loaderGLTF = new GLTFLoader();
         loaderGLTF.load(
@@ -21,12 +20,18 @@ async function loadGLTFModel(url, camera) {
                 gltfAnimations.filter(a => a.name != 'TPose').forEach(a => {
                     animationsMap.set(a.name, mixer.clipAction(a));
                 });
-                camera.lookAt(model.position);
-                var characterControls = new CharacterControls(model, mixer, animationsMap, camera, 'Idle');
-
-                console.log(model);
-                resolve(characterControls);
-
+                console.log(model)
+                if (char) {
+                    camera.lookAt(model.position);
+                    var characterControls = new CharacterControls(model, mixer, animationsMap, camera, 'Idle');
+                    resolve(characterControls);
+                }
+                else {
+                    for (var child of model.children) {
+                        console.log(child.name);
+                    }
+                    resolve(model);
+                }
             },
             undefined,
             (error) => {
@@ -65,7 +70,7 @@ async function main() {
 
     // PLANO
     {
-        const planeSize = 200;
+        const planeSize = 2000;
 
         const loader = new THREE.TextureLoader();
         const texture = loader.load('../Texture/terra.png');
@@ -107,12 +112,12 @@ async function main() {
     }
 
     // MODEL
-    var characterControls = await loadGLTFModel("../Models/Soldier.glb", camera);
-    var casa = await loadGLTFModel("../Models/house/scene.gltf", camera2);
-    casa.model.scale.set(10, 10, 10);
-    casa.model.position.set(10, 10, -20);
-    scene.add(casa.model);
+    var characterControls = await loadGLTFModel("../Models/Soldier.glb", camera, true);
+    var arvore = await loadGLTFModel("../Models/Arvores.glb", camera, false);
+
+
     scene.add(characterControls.model);
+    scene.add(arvore);
     //scene.add(characterControls.cubeMesh);
     // CANNON-ES
     const physicsWorld = new CANNON.World({ gravity: new CANNON.Vec3(0, -9.82, 0), });
